@@ -23,7 +23,7 @@ set(CPACK_PACKAGE_HOMEPAGE_URL ${PROJECT_HOMEPAGE_URL})
 # ----------------------------------------------------------------------------
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CMAKE_PROJECT_NAME})
-set(CPACK_PACKAGE_ICON "share/icons/hicolor/256x256/apps/QGroundControl.png")
+set(CPACK_PACKAGE_ICON "QGroundControl.png")
 if(APPLE)
     set(QGC_APP_ICON "${CMAKE_SOURCE_DIR}/deploy/macos/qgroundcontrol.icns")
 elseif(WIN32)

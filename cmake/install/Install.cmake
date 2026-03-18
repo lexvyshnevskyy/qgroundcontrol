@@ -81,6 +81,11 @@ elseif(LINUX)
         RENAME ${CMAKE_PROJECT_NAME}.png
     )
     install(
+        FILES "${QGC_APPIMAGE_ICON_256_PATH}"
+        DESTINATION "."
+        RENAME ${CMAKE_PROJECT_NAME}.png
+    )
+    install(
         FILES "${QGC_APPIMAGE_ICON_SCALABLE_PATH}"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps/"
         RENAME ${CMAKE_PROJECT_NAME}.svg
