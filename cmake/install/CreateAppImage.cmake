@@ -8,8 +8,16 @@
 
 message(STATUS "QGC: Creating AppImage...")
 
-set(APPDIR_PATH "${CMAKE_BINARY_DIR}/AppDir")
-set(APPIMAGE_PATH "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_PROCESSOR}.AppImage")
+if(DEFINED QGC_BUILD_DIR AND NOT QGC_BUILD_DIR STREQUAL "")
+    set(_QGC_APPIMAGE_BUILD_DIR "${QGC_BUILD_DIR}")
+elseif(DEFINED CMAKE_BINARY_DIR AND NOT CMAKE_BINARY_DIR STREQUAL "")
+    set(_QGC_APPIMAGE_BUILD_DIR "${CMAKE_BINARY_DIR}")
+else()
+    message(FATAL_ERROR "QGC: Could not determine build directory for AppImage packaging. Set QGC_BUILD_DIR before running CreateAppImage.cmake.")
+endif()
+
+set(APPDIR_PATH "${_QGC_APPIMAGE_BUILD_DIR}/AppDir")
+set(APPIMAGE_PATH "${_QGC_APPIMAGE_BUILD_DIR}/${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_PROCESSOR}.AppImage")
 
 # ============================================================================
 # Helper Functions
@@ -20,9 +28,9 @@ set(APPIMAGE_PATH "${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_PROC
 function(download_tool VAR URL)
     cmake_parse_arguments(_DT "" "EXPECTED_HASH" "" ${ARGN})
     cmake_path(GET URL FILENAME _name)
-    set(_dest "${CMAKE_BINARY_DIR}/tools/${_name}")
+    set(_dest "${_QGC_APPIMAGE_BUILD_DIR}/tools/${_name}")
     if(NOT EXISTS "${_dest}")
-        file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tools")
+        file(MAKE_DIRECTORY "${_QGC_APPIMAGE_BUILD_DIR}/tools")
         message(STATUS "QGC: Downloading ${_name} to ${_dest}")
         set(_download_args
             DOWNLOAD "${URL}" "${_dest}"
@@ -117,7 +125,7 @@ execute_process(
             --appdir "${APPDIR_PATH}"
             --executable "${APPDIR_PATH}/usr/bin/${CMAKE_PROJECT_NAME}"
             --desktop-file "${APPDIR_PATH}/usr/share/applications/${QGC_PACKAGE_NAME}.desktop"
-            --custom-apprun "${CMAKE_BINARY_DIR}/AppRun"
+            --custom-apprun "${_QGC_APPIMAGE_BUILD_DIR}/AppRun"
             --icon-file "${APPDIR_PATH}/usr/share/icons/hicolor/256x256/apps/${CMAKE_PROJECT_NAME}.png"
             ${_linuxdeploy_extra_args}
     COMMAND_ECHO STDOUT

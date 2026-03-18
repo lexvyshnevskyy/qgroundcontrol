@@ -105,6 +105,7 @@ elseif(LINUX)
         set(CMAKE_PROJECT_VERSION \"${CMAKE_PROJECT_VERSION}\")
         set(QGC_PACKAGE_NAME \"${QGC_PACKAGE_NAME}\")
         set(CMAKE_SYSTEM_PROCESSOR \"${CMAKE_SYSTEM_PROCESSOR}\")
+        set(QGC_BUILD_DIR \"${CMAKE_BINARY_DIR}\")
     ")
     install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/install/CreateAppImage.cmake")
 
