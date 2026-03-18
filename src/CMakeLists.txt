@@ -101,7 +101,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         Qt6::Sensors
         Qt6::StateMachine
         Qt6::Svg
-        Qt6::TextToSpeech
         Qt6::Widgets
         Qt6::Xml
 

@@ -188,7 +188,6 @@ find_package(Qt6
         Sensors
         Sql
         Svg
-        TextToSpeech
         Widgets
         Xml
         Quick3D
