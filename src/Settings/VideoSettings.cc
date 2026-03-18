@@ -55,13 +55,15 @@ DECLARE_SETTINGGROUP(Video, "Video")
     _setForceVideoDecodeList();
 
     // Set default value for videoSource
-    _setDefaults();
+    _setDefaults(videoSourceList);
 }
 
-void VideoSettings::_setDefaults()
+void VideoSettings::_setDefaults(const QVariantList &videoSourceList)
 {
     if (_noVideo) {
         _nameToMetaDataMap[videoSourceName]->setRawDefaultValue(videoSourceNoVideo);
+    } else if (videoSourceList.contains(videoSourceUDPH264)) {
+        _nameToMetaDataMap[videoSourceName]->setRawDefaultValue(videoSourceUDPH264);
     } else {
         _nameToMetaDataMap[videoSourceName]->setRawDefaultValue(videoDisabled);
     }
@@ -85,6 +87,8 @@ DECLARE_SETTINGSFACT_NO_FUNC(VideoSettings, videoSource)
         if(!_videoSourceFact->enumValues().contains(_videoSourceFact->rawValue().toString())) {
             if (_noVideo) {
                 _videoSourceFact->setRawValue(videoSourceNoVideo);
+            } else if (_videoSourceFact->enumValues().contains(videoSourceUDPH264)) {
+                _videoSourceFact->setRawValue(videoSourceUDPH264);
             } else {
                 _videoSourceFact->setRawValue(videoDisabled);
             }
@@ -152,6 +156,9 @@ DECLARE_SETTINGSFACT_NO_FUNC(VideoSettings, udpUrl)
 {
     if (!_udpUrlFact) {
         _udpUrlFact = _createSettingsFact(udpUrlName);
+        if (_udpUrlFact->rawValue().toString().isEmpty()) {
+            _udpUrlFact->setRawValue(QStringLiteral("0.0.0.0:5600"));
+        }
         connect(_udpUrlFact, &Fact::valueChanged, this, &VideoSettings::_configChanged);
     }
     return _udpUrlFact;

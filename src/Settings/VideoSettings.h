@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtCore/QVariantList>
 #include <QtQmlIntegration/QtQmlIntegration>
 
 #include "SettingsGroup.h"
@@ -66,7 +67,7 @@ private slots:
     void _configChanged             (QVariant value);
 
 private:
-    void _setDefaults               ();
+    void _setDefaults               (const QVariantList &videoSourceList);
     void _setForceVideoDecodeList();
 
 private:
