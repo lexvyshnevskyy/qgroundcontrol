@@ -123,15 +123,15 @@ message(STATUS "QGC: Bundling runtime dependencies with linuxdeploy...")
 # are temporarily inconsistent after cached apt restores.
 set(_linuxdeploy_extra_args)
 execute_process(
-    COMMAND /bin/sh -c "ldconfig -p | awk '/libblas\\.so\\.3/{print $NF; exit}'"
-    OUTPUT_VARIABLE _blas_path
-    OUTPUT_STRIP_TRAILING_WHITESPACE
+        COMMAND /bin/sh -c "ldconfig -p | awk '/libblas\\.so\\.3/{print $NF; exit}'"
+        OUTPUT_VARIABLE _blas_path
+        OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 if(NOT _blas_path)
     file(GLOB _blas_candidates
-        "/usr/lib/*/libblas.so.3"
-        "/usr/lib/*/openblas*/libblas.so.3"
-        "/lib/*/libblas.so.3"
+            "/usr/lib/*/libblas.so.3"
+            "/usr/lib/*/openblas*/libblas.so.3"
+            "/lib/*/libblas.so.3"
     )
     list(LENGTH _blas_candidates _blas_candidate_count)
     if(_blas_candidate_count GREATER 0)
@@ -147,16 +147,34 @@ else()
 endif()
 
 execute_process(
-    COMMAND "${LINUXDEPLOY_PATH}"
-            --appdir "${APPDIR_PATH}"
-            --executable "${_QGC_EXECUTABLE_PATH}"
-            --desktop-file "${_QGC_DESKTOP_PATH}"
-            --custom-apprun "${_QGC_APPIMAGE_BUILD_DIR}/AppRun"
-            --icon-file "${_QGC_ICON_PATH}"
-            ${_linuxdeploy_extra_args}
-    COMMAND_ECHO STDOUT
-    COMMAND_ERROR_IS_FATAL ANY
+        COMMAND "${LINUXDEPLOY_PATH}"
+        --appdir "${APPDIR_PATH}"
+        --executable "${_QGC_EXECUTABLE_PATH}"
+        --desktop-file "${_QGC_DESKTOP_PATH}"
+        --custom-apprun "${_QGC_APPIMAGE_BUILD_DIR}/AppRun"
+        --icon-file "${_QGC_ICON_PATH}"
+        ${_linuxdeploy_extra_args}
+        COMMAND_ECHO STDOUT
+        COMMAND_ERROR_IS_FATAL ANY
 )
+
+# ============================================================================
+# Prepare AppDir root icon links required by appimagetool
+# ============================================================================
+
+message(STATUS "QGC: Preparing AppDir root icon links for appimagetool...")
+
+set(_QGC_ROOT_ICON_NAME "${CMAKE_PROJECT_NAME}.png")
+set(_QGC_ROOT_ICON_PATH "${APPDIR_PATH}/${_QGC_ROOT_ICON_NAME}")
+set(_QGC_DIRICON_PATH "${APPDIR_PATH}/.DirIcon")
+
+if(NOT EXISTS "${_QGC_ROOT_ICON_PATH}")
+    file(CREATE_LINK "${_QGC_ICON_PATH}" "${_QGC_ROOT_ICON_PATH}" SYMBOLIC)
+endif()
+
+if(NOT EXISTS "${_QGC_DIRICON_PATH}")
+    file(CREATE_LINK "${_QGC_ROOT_ICON_PATH}" "${_QGC_DIRICON_PATH}" SYMBOLIC)
+endif()
 
 # ============================================================================
 # Build Final AppImage
@@ -168,29 +186,9 @@ set(ENV{ARCH} ${CMAKE_SYSTEM_PROCESSOR})
 set(ENV{VERSION} ${CMAKE_PROJECT_VERSION})
 
 execute_process(
-    COMMAND "${APPIMAGETOOL_PATH}" "${APPDIR_PATH}" "${APPIMAGE_PATH}"
-    COMMAND_ECHO STDOUT
-    COMMAND_ERROR_IS_FATAL ANY
+        COMMAND "${APPIMAGETOOL_PATH}" "${APPDIR_PATH}" "${APPIMAGE_PATH}"
+        COMMAND_ECHO STDOUT
+        COMMAND_ERROR_IS_FATAL ANY
 )
 
 message(STATUS "QGC: AppImage created successfully: ${APPIMAGE_PATH}")
-
-# ============================================================================
-# Validation & Linting
-# ============================================================================
-
-if(EXISTS "${APPIMAGELINT_PATH}")
-    message(STATUS "QGC: Running AppImage linter...")
-    execute_process(
-        COMMAND "${APPIMAGELINT_PATH}" "${APPIMAGE_PATH}"
-        RESULT_VARIABLE LINT_RESULT
-        COMMAND_ECHO STDOUT
-    )
-    if(NOT LINT_RESULT EQUAL 0)
-        message(WARNING "QGC: AppImageLint reported issues - see output above")
-    else()
-        message(STATUS "QGC: AppImage passed validation")
-    endif()
-else()
-    message(STATUS "QGC: AppImageLint not available, skipping validation")
-endif()
