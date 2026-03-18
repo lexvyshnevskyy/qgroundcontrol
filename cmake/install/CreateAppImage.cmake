@@ -19,6 +19,32 @@ endif()
 set(APPDIR_PATH "${_QGC_APPIMAGE_BUILD_DIR}/AppDir")
 set(APPIMAGE_PATH "${_QGC_APPIMAGE_BUILD_DIR}/${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_PROCESSOR}.AppImage")
 
+if(DEFINED CMAKE_INSTALL_PREFIX AND NOT CMAKE_INSTALL_PREFIX STREQUAL "")
+    # During cpack/cmake --install the staging root is CMAKE_INSTALL_PREFIX.
+    set(APPDIR_PATH "${CMAKE_INSTALL_PREFIX}")
+endif()
+
+if(NOT DEFINED QGC_INSTALL_BINDIR OR QGC_INSTALL_BINDIR STREQUAL "")
+    set(QGC_INSTALL_BINDIR "bin")
+endif()
+if(NOT DEFINED QGC_INSTALL_DATADIR OR QGC_INSTALL_DATADIR STREQUAL "")
+    set(QGC_INSTALL_DATADIR "share")
+endif()
+
+set(_QGC_EXECUTABLE_PATH "${APPDIR_PATH}/${QGC_INSTALL_BINDIR}/${CMAKE_PROJECT_NAME}")
+set(_QGC_DESKTOP_PATH "${APPDIR_PATH}/${QGC_INSTALL_DATADIR}/applications/${QGC_PACKAGE_NAME}.desktop")
+set(_QGC_ICON_PATH "${APPDIR_PATH}/${QGC_INSTALL_DATADIR}/icons/hicolor/256x256/apps/${CMAKE_PROJECT_NAME}.png")
+
+if(NOT EXISTS "${_QGC_EXECUTABLE_PATH}")
+    message(FATAL_ERROR "QGC: Expected executable not found for AppImage packaging: ${_QGC_EXECUTABLE_PATH}")
+endif()
+if(NOT EXISTS "${_QGC_DESKTOP_PATH}")
+    message(FATAL_ERROR "QGC: Expected desktop file not found for AppImage packaging: ${_QGC_DESKTOP_PATH}")
+endif()
+if(NOT EXISTS "${_QGC_ICON_PATH}")
+    message(FATAL_ERROR "QGC: Expected icon file not found for AppImage packaging: ${_QGC_ICON_PATH}")
+endif()
+
 # ============================================================================
 # Helper Functions
 # ============================================================================
@@ -123,10 +149,10 @@ endif()
 execute_process(
     COMMAND "${LINUXDEPLOY_PATH}"
             --appdir "${APPDIR_PATH}"
-            --executable "${APPDIR_PATH}/usr/bin/${CMAKE_PROJECT_NAME}"
-            --desktop-file "${APPDIR_PATH}/usr/share/applications/${QGC_PACKAGE_NAME}.desktop"
+            --executable "${_QGC_EXECUTABLE_PATH}"
+            --desktop-file "${_QGC_DESKTOP_PATH}"
             --custom-apprun "${_QGC_APPIMAGE_BUILD_DIR}/AppRun"
-            --icon-file "${APPDIR_PATH}/usr/share/icons/hicolor/256x256/apps/${CMAKE_PROJECT_NAME}.png"
+            --icon-file "${_QGC_ICON_PATH}"
             ${_linuxdeploy_extra_args}
     COMMAND_ECHO STDOUT
     COMMAND_ERROR_IS_FATAL ANY
