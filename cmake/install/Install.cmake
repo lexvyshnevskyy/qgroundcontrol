@@ -108,8 +108,15 @@ elseif(LINUX)
         set(QGC_BUILD_DIR \"${CMAKE_BINARY_DIR}\")
         set(QGC_INSTALL_BINDIR \"${CMAKE_INSTALL_BINDIR}\")
         set(QGC_INSTALL_DATADIR \"${CMAKE_INSTALL_DATADIR}\")
+        set(QGC_CREATE_APPIMAGE_SCRIPT \"${CMAKE_SOURCE_DIR}/cmake/install/CreateAppImage.cmake\")
     ")
-    install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/install/CreateAppImage.cmake")
+    install(CODE "
+        if(DEFINED CPACK_GENERATOR AND CPACK_GENERATOR MATCHES \"(^|;)AppImage(;|$)\")
+            message(STATUS \"QGC: Skipping CreateAppImage.cmake during CPack AppImage generation\")
+        else()
+            include(\"\${QGC_CREATE_APPIMAGE_SCRIPT}\")
+        endif()
+    ")
 
 # ----------------------------------------------------------------------------
 # Windows Installation & Installer Creation
