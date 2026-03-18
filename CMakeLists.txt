@@ -102,6 +102,9 @@ if(QGC_BUILD_TESTING)
     include(CTest)
 endif()
 
+# CPack AppImage requires CPACK_PACKAGE_ICON to be defined.
+set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/resources/icons/qgroundcontrol.png" CACHE FILEPATH "CPack package icon")
+
 # ----------------------------------------------------------------------------
 # CPM (CMake Package Manager) Configuration
 # ----------------------------------------------------------------------------
