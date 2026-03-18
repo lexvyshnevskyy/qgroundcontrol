@@ -11,6 +11,10 @@ QGC_LOGGING_CATEGORY(AudioOutputLog, "Utilities.AudioOutput");
 // qt.speech.tts.flite
 // qt.speech.tts.android
 
+namespace {
+constexpr bool kEnableSoundNotifications = false;
+}
+
 const QHash<QString, QString> AudioOutput::_textHash = {
     { "ERR",            "error" },
     { "POSCTL",         "Position Control" },
@@ -122,6 +126,12 @@ void AudioOutput::setMuted(bool muted)
 
 void AudioOutput::say(const QString &text, TextMods textMods)
 {
+    if (!kEnableSoundNotifications) {
+        Q_UNUSED(text);
+        Q_UNUSED(textMods);
+        return;
+    }
+
     if (!_initialized) {
         if (!qgcApp()->runningUnitTests()) {
             qCWarning(AudioOutputLog) << "AudioOutput not initialized. Call init() before using say().";
