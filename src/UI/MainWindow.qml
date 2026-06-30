@@ -154,7 +154,46 @@ ApplicationWindow {
     //-------------------------------------------------------------------------
     //-- Global simple message dialog
 
+    function _isErrorDialog(dialogTitle, dialogText) {
+        const normalizedTitle = (dialogTitle ?? "").toString().toLowerCase()
+        const normalizedText = (dialogText ?? "").toString().toLowerCase()
+
+        return normalizedTitle.includes("error") || normalizedText.includes("error")
+    }
+
+    function _isAutonomousModeActive(vehicle) {
+        if (!vehicle) {
+            return false
+        }
+
+        const currentMode = (vehicle.flightMode ?? "").toString()
+        if (currentMode.length === 0) {
+            return false
+        }
+
+        return currentMode === vehicle.missionFlightMode ||
+               currentMode === vehicle.rtlFlightMode ||
+               currentMode === vehicle.smartRTLFlightMode ||
+               currentMode === vehicle.landFlightMode ||
+               currentMode === vehicle.takeoffFlightMode ||
+               currentMode === vehicle.gotoFlightMode ||
+               currentMode === vehicle.pauseFlightMode
+    }
+
+    function _shouldSuppressPopupForVehicleState() {
+        const vehicle = globals.activeVehicle
+        if (!vehicle) {
+            return false
+        }
+
+        return vehicle.armed || _isAutonomousModeActive(vehicle)
+    }
+
     function _showMessageDialogWorker(owner, dialogTitle, dialogText, buttons = Dialog.Ok, acceptFunction = null, closeFunction = null) {
+        if (_isErrorDialog(dialogTitle, dialogText) || _shouldSuppressPopupForVehicleState()) {
+            return
+        }
+
         let dialog = simpleMessageDialogComponent.createObject(owner, { title: dialogTitle, text: dialogText, buttons: buttons, acceptFunction: acceptFunction, closeFunction: closeFunction })
         dialog.open()
     }
@@ -394,6 +433,11 @@ ApplicationWindow {
     //-- Critical Vehicle Message Popup
 
     function showCriticalVehicleMessage(message) {
+        const normalizedMessage = (message ?? "").toString().toLowerCase()
+        if (normalizedMessage.includes("error") || _shouldSuppressPopupForVehicleState()) {
+            return
+        }
+
         closeIndicatorDrawer()
         if (criticalVehicleMessagePopup.visible || QGroundControl.videoManager.fullScreen) {
             // We received additional warning message while an older warning message was still displayed.

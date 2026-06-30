@@ -102,6 +102,9 @@ if(QGC_BUILD_TESTING)
     include(CTest)
 endif()
 
+# CPack AppImage requires CPACK_PACKAGE_ICON to be defined.
+set(CPACK_PACKAGE_ICON "${CMAKE_PROJECT_NAME}" CACHE STRING "CPack package icon")
+
 # ----------------------------------------------------------------------------
 # CPM (CMake Package Manager) Configuration
 # ----------------------------------------------------------------------------
@@ -188,7 +191,6 @@ find_package(Qt6
         Sensors
         Sql
         Svg
-        TextToSpeech
         Widgets
         Xml
         Quick3D

@@ -82,6 +82,39 @@ Item {
         videoHeight:             videoStreaming.getHeight()
     }
 
+    OnScreenFlyToController {
+        id:                      flyToController
+        anchors.fill:            parent
+        vehicle:                 QGroundControl.multiVehicleManager.activeVehicle
+        videoWidth:              videoStreaming.getWidth()
+        videoHeight:             videoStreaming.getHeight()
+        armed:                   flyToButton.checked
+    }
+
+    Row {
+        id:                 flyToControls
+        anchors.left:       parent.left
+        anchors.top:        parent.top
+        anchors.margins:    ScreenTools.defaultFontPixelWidth
+        spacing:            ScreenTools.defaultFontPixelWidth
+        visible:            pipState.state === pipState.fullState && !!QGroundControl.multiVehicleManager.activeVehicle
+
+        QGCButton {
+            id:             flyToButton
+            checkable:      true
+            text:           checked ? qsTr("Fly-To: tap target") : qsTr("Fly-To Object")
+        }
+
+        QGCButton {
+            text:           qsTr("Abort")
+            visible:        flyToButton.checked
+            onClicked: {
+                flyToController.abort()
+                flyToButton.checked = false
+            }
+        }
+    }
+
     MouseArea {
         id:                         flyViewVideoMouseArea
         anchors.fill:               parent
@@ -116,6 +149,9 @@ Item {
             if (_dragging) {
                 onScreenGimbalController.mouseDragEnd()
                 cameraTrackingController.mouseDragEnd(mouse.x, mouse.y)
+            } else if (flyToController.armed) {
+                // Fly-To mode owns the click: send the target, don't also move the gimbal.
+                flyToController.mouseClicked(mouse.x, mouse.y)
             } else {
                 onScreenGimbalController.mouseClicked(mouse.x, mouse.y)
                 cameraTrackingController.mouseClicked(mouse.x, mouse.y)

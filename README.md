@@ -59,3 +59,42 @@ With QGroundControl, you're in full command of your UAV, ready to take your miss
 ### Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/mavlink/qgroundcontrol.svg?variant=adaptive)](https://starchart.cc/mavlink/qgroundcontrol)
+
+
+***
+#installation
+
+sudo apt update
+sudo apt install -y ninja-build build-essential cmake pkg-config
+sudo apt install -y \
+libgl1-mesa-dev \
+libegl1-mesa-dev \
+mesa-common-dev \
+libxkbcommon-dev \
+libxkbcommon-x11-dev \
+libxcb-cursor0 \
+libxcb-glx0-dev \
+libx11-xcb-dev \
+libxrender-dev \
+libxi-dev \
+libxext-dev \
+libxfixes-dev \
+libvulkan-dev
+
+
+
+cd ~
+wget https://download.qt.io/official_releases/online_installers/qt-online-installer-linux-x64-online.run
+./qt-online-installer-linux-x64-online.run
+
+python3 ./qgroundcontrol/tools/setup/install_dependencies.py --platform debian
+
+cmake -S . -B build -G Ninja \
+-DCMAKE_BUILD_TYPE=Release \
+-DQGC_BUILD_APPIMAGE=ON \
+-DCMAKE_PREFIX_PATH="$HOME/Qt/6.10.1/gcc_64"
+
+cmake --build build -j$(nproc)
+
+cd build
+cpack -G AppImage

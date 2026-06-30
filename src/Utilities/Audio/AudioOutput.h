@@ -3,7 +3,6 @@
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QObject>
 
-class QTextToSpeech;
 class Fact;
 class AudioOutputTest;
 
@@ -53,14 +52,8 @@ public:
     void say(const QString &text, TextMods textMods = TextMod::None);
 
 private:
-    QTextToSpeech *_engine = nullptr;
-    QAtomicInteger<qsizetype> _textQueueSize = 0;
     bool _initialized = false;
     std::atomic_bool _muted = false;
-
-    static const QHash<QString, QString> _textHash;
-
-    static constexpr qsizetype kMaxTextQueueSize = 20;
 
     /// Fixes text messages for audio output.
     ///     @param string The text message to fix.

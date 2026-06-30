@@ -2377,6 +2377,21 @@ void Vehicle::sendCommand(int compId, int command, bool showError, double param1
                 static_cast<float>(param7));
 }
 
+void Vehicle::sendFlyToClickedTarget(double normalizedX, double normalizedY, bool engage)
+{
+    // param1/param2: normalized click position in the video frame (0..1)
+    // param3: action flag (1 = engage fly-to, 0 = abort/hold)
+    // The FlightController companion filters on the command id and ignores the
+    // remaining params for now (it flies to the currently tracked object).
+    sendMavCommand(
+                MAV_COMP_ID_AUTOPILOT1,
+                MAV_CMD_USER_1,
+                false,                                  // showError
+                static_cast<float>(normalizedX),
+                static_cast<float>(normalizedY),
+                engage ? 1.0f : 0.0f);
+}
+
 void Vehicle::sendMavCommandWithHandler(const MavCmdAckHandlerInfo_t* ackHandlerInfo, int compId, MAV_CMD command, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
 {
     _sendMavCommandWorker(false,                // commandInt

@@ -616,6 +616,14 @@ public:
     /// Same as sendMavCommand but available from Qml.
     Q_INVOKABLE void sendCommand(int compId, int command, bool showError, double param1 = 0.0, double param2 = 0.0, double param3 = 0.0, double param4 = 0.0, double param5 = 0.0, double param6 = 0.0, double param7 = 0.0);
 
+    /// Sends a custom "fly to clicked object" command (MAV_CMD_USER_1) to the onboard
+    /// FlightController companion. The companion translates it into a guided fly-to /
+    /// abort request for its visual-guidance node.
+    ///     @param normalizedX Horizontal click position in the video frame, normalized 0..1.
+    ///     @param normalizedY Vertical click position in the video frame, normalized 0..1.
+    ///     @param engage true to fly to the tracked object, false to abort/hold.
+    Q_INVOKABLE void sendFlyToClickedTarget(double normalizedX, double normalizedY, bool engage = true);
+
     typedef enum {
         MavCmdResultCommandResultOnly,          ///< commandResult specifies full success/fail info
         MavCmdResultFailureNoResponseToCommand, ///< No response from vehicle to command

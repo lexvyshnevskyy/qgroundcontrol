@@ -81,6 +81,11 @@ elseif(LINUX)
         RENAME ${CMAKE_PROJECT_NAME}.png
     )
     install(
+        FILES "${QGC_APPIMAGE_ICON_256_PATH}"
+        DESTINATION "."
+        RENAME ${CMAKE_PROJECT_NAME}.png
+    )
+    install(
         FILES "${QGC_APPIMAGE_ICON_SCALABLE_PATH}"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps/"
         RENAME ${CMAKE_PROJECT_NAME}.svg
@@ -105,8 +110,30 @@ elseif(LINUX)
         set(CMAKE_PROJECT_VERSION \"${CMAKE_PROJECT_VERSION}\")
         set(QGC_PACKAGE_NAME \"${QGC_PACKAGE_NAME}\")
         set(CMAKE_SYSTEM_PROCESSOR \"${CMAKE_SYSTEM_PROCESSOR}\")
+        set(QGC_BUILD_DIR \"${CMAKE_BINARY_DIR}\")
+        set(QGC_INSTALL_BINDIR \"${CMAKE_INSTALL_BINDIR}\")
+        set(QGC_INSTALL_DATADIR \"${CMAKE_INSTALL_DATADIR}\")
+        set(QGC_CREATE_APPIMAGE_SCRIPT \"${CMAKE_SOURCE_DIR}/cmake/install/CreateAppImage.cmake\")
     ")
-    install(SCRIPT "${CMAKE_SOURCE_DIR}/cmake/install/CreateAppImage.cmake")
+    install(CODE "
+        set(_qgc_running_cpack_appimage FALSE)
+        if(DEFINED CPACK_GENERATOR AND CPACK_GENERATOR MATCHES \"(^|;)AppImage(;|$)\")
+            set(_qgc_running_cpack_appimage TRUE)
+        elseif(DEFINED CMAKE_INSTALL_PREFIX AND CMAKE_INSTALL_PREFIX MATCHES \"/_CPack_Packages/.*/AppImage/\")
+            set(_qgc_running_cpack_appimage TRUE)
+        endif()
+
+        if(_qgc_running_cpack_appimage)
+            set(_qgc_root_desktop \"\${CMAKE_INSTALL_PREFIX}/${QGC_PACKAGE_NAME}.desktop\")
+            if(EXISTS \"\${_qgc_root_desktop}\")
+                file(REMOVE \"\${_qgc_root_desktop}\")
+                message(STATUS \"QGC: Removed pre-existing AppDir root desktop file: \${_qgc_root_desktop}\")
+            endif()
+            message(STATUS \"QGC: Skipping CreateAppImage.cmake during CPack AppImage generation\")
+        else()
+            include(\"\${QGC_CREATE_APPIMAGE_SCRIPT}\")
+        endif()
+    ")
 
 # ----------------------------------------------------------------------------
 # Windows Installation & Installer Creation
